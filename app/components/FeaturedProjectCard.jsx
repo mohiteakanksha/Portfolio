@@ -15,11 +15,7 @@ export default function FeaturedProjectCard({
   return (
     <div className="rounded-2xl overflow-hidden bg-white border shadow-md hover:shadow-xl transition relative">
       {/* Featured Badge */}
-      {featured && (
-        <span className="absolute top-4 left-4 bg-purple-600 text-white text-xs px-3 py-1 rounded-md z-10">
-          Featured
-        </span>
-      )}
+     
 
       {/* Project Image */}
       <img src={image} alt={title} className="w-full h-60 object-cover" />
