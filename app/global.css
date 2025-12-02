@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* optional extras */
+html { scroll-behavior: smooth; }
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* globals.css */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+img { user-select: none; }
