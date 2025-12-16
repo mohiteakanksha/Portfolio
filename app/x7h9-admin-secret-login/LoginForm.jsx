@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminLogin() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,8 +21,7 @@ export default function AdminLogin() {
     const data = await res.json();
 
     if (data.success) {
-      // Redirect to adminProject page
-      window.location.href = "/AdminDashboard";
+      router.replace("/admin-dashboard"); // ✅ IMPORTANT
     } else {
       setError("Invalid email or password");
     }
@@ -28,33 +29,27 @@ export default function AdminLogin() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        className="bg-white p-8 rounded-2xl shadow-xl w-80"
-        onSubmit={handleLogin}
-      >
-        <h1 className="text-2xl font-bold text-center mb-6">Admin Login</h1>
+      <form onSubmit={handleLogin} className="bg-white p-8 rounded-xl w-80">
+        <h1 className="text-2xl font-bold mb-4 text-center">Admin Login</h1>
 
         <input
-          type="email"
+          className="w-full p-2 border mb-3"
           placeholder="Email"
-          className="w-full p-2 border rounded mb-3"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
 
         <input
+          className="w-full p-2 border mb-3"
           type="password"
           placeholder="Password"
-          className="w-full p-2 border rounded mb-3"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
 
-        {error && <p className="text-red-500 text-sm mb-3 text-center">{error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <button className="w-full bg-purple-600 hover:bg-purple-700 text-white p-2 rounded">
+        <button className="w-full bg-purple-600 text-white p-2 rounded">
           Login
         </button>
       </form>

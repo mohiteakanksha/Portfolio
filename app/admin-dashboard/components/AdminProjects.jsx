@@ -8,32 +8,9 @@ export default function Projects() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(null);
-
-  // 🔐 Admin auth check
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("/api/admin-auth-check");
-        const data = await res.json();
-
-        if (!data.isAdmin) {
-          router.push("/x7h9-admin-secret-login");
-        } else {
-          setIsAdmin(true);
-        }
-      } catch {
-        router.push("/x7h9-admin-secret-login");
-      }
-    };
-
-    checkAuth();
-  }, [router]);
 
   // 📦 Fetch projects
   useEffect(() => {
-    if (!isAdmin) return;
-
     const fetchProjects = async () => {
       try {
         const res = await fetch("/api/projects", { cache: "no-store" });
@@ -47,7 +24,7 @@ export default function Projects() {
     };
 
     fetchProjects();
-  }, [isAdmin]);
+  }, []);
 
   const handleAddProject = () => {
     router.push("/admin-dashboard/add-project");
@@ -58,23 +35,18 @@ export default function Projects() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
+    if (!confirm("Are you sure?")) return;
 
-    try {
-      await fetch("/api/projects", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
+    await fetch("/api/projects", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
 
-      setProjects((prev) => prev.filter((p) => p._id !== id));
-      alert("Project deleted successfully!");
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
+    setProjects((prev) => prev.filter((p) => p._id !== id));
   };
 
-  if (isAdmin === null || loading) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="p-10">
