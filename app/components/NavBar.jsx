@@ -39,15 +39,7 @@ export default function Navbar() {
         <li><a href="#Contact">Contact</a></li>
 
         {/* Theme toggle inside the same row */}
-        <li>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-full bg-gray-200 dark:bg-purple-600 
-                       text-black dark:text-white transition"
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-        </li>
+       
       </ul>
 
     </nav>
