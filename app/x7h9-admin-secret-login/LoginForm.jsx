@@ -20,7 +20,7 @@ export default function AdminLogin() {
 
     if (data.success) {
       // Redirect to adminProject page
-      window.location.href = "/adminProject";
+      window.location.href = "/AdminDashboard";
     } else {
       setError("Invalid email or password");
     }

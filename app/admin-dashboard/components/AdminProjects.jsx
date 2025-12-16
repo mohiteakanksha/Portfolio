@@ -8,57 +8,53 @@ export default function Projects() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(null); // null = checking auth
+  const [isAdmin, setIsAdmin] = useState(null);
 
-  // Check admin authentication via API
+  // 🔐 Admin auth check
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/admin-auth-check");
         const data = await res.json();
+
         if (!data.isAdmin) {
           router.push("/x7h9-admin-secret-login");
         } else {
           setIsAdmin(true);
         }
-      } catch (err) {
-        console.error(err);
+      } catch {
         router.push("/x7h9-admin-secret-login");
       }
     };
+
     checkAuth();
   }, [router]);
 
-  // Fetch projects after authentication
+  // 📦 Fetch projects
   useEffect(() => {
     if (!isAdmin) return;
+
     const fetchProjects = async () => {
       try {
-        const res = await fetch("/api/projects");
+        const res = await fetch("/api/projects", { cache: "no-store" });
         const data = await res.json();
-        setProjects(data.projects);
-      } catch (error) {
-        console.error(error);
+        setProjects(data.projects || []);
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchProjects();
   }, [isAdmin]);
 
   const handleAddProject = () => {
-    router.push("/admin-dashboard/AddProject");
+    router.push("/admin-dashboard/add-project");
   };
 
-  const handleEdit = (project) => {
-    router.push(
-      `/admin-dashboard/AddProject?` +
-        `id=${project._id}` +
-        `&title=${encodeURIComponent(project.title)}` +
-        `&image=${encodeURIComponent(project.image)}` +
-        `&tags=${encodeURIComponent(project.tags.join(","))}` +
-        `&desc=${encodeURIComponent(project.desc)}`
-    );
+  const handleEdit = (id) => {
+    router.push(`/admin-dashboard/add-project?id=${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -70,7 +66,8 @@ export default function Projects() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      setProjects(projects.filter((p) => p._id !== id));
+
+      setProjects((prev) => prev.filter((p) => p._id !== id));
       alert("Project deleted successfully!");
     } catch (error) {
       console.error("Delete failed:", error);
@@ -85,7 +82,7 @@ export default function Projects() {
         <h1 className="text-3xl font-bold">Projects</h1>
         <button
           onClick={handleAddProject}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          className="px-4 py-2 bg-green-600 text-white rounded-lg"
         >
           + Add New Project
         </button>
@@ -95,12 +92,9 @@ export default function Projects() {
         {projects.map((project) => (
           <ProjectCard
             key={project._id}
-            title={project.title}
-            image={project.image}
-            tags={project.tags}
-            desc={project.desc}
-            onEdit={() => handleEdit(project)}
-            onDelete={() => handleDelete(project._id)}
+            project={project}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         ))}
       </div>

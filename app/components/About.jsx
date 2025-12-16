@@ -31,7 +31,7 @@ export default function About() {
               </h2>
 
               <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                I am a passionate <span className="font-semibold text-purple-600">Full Stack Developer</span> with a B.E in Computer Science Engineering From Savitribai Phule Pune Univercity.
+                I am a passionate <span className="font-semibold text-purple-600">Full Stack Developer</span> with a B.E in Computer Science Engineering From Savitribai Phule Pune University.
               </p>
               <p className="text-gray-700 leading-relaxed text-lg">
                 I have a strong command of frontend and backend technologies, and I specialize in building scalable, high-performance web applications.

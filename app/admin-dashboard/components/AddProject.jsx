@@ -1,76 +1,93 @@
+
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AddProject() {
   const params = useSearchParams();
-  const router = useRouter();
+  const id = params.get("id");
+  const isEditing = Boolean(id);
 
-  const [title, setTitle] = useState(params.get("title") || "");
-  const [image, setImage] = useState(params.get("image") || "");
-  const [tags, setTags] = useState(params.get("tags") || "");
-  const [desc, setDesc] = useState(params.get("desc") || "");
-  const [featured, setFeatured] = useState(params.get("featured") === "true");
-  const [codeLink, setCodeLink] = useState(params.get("codeLink") || "");
-  const [liveLink, setLiveLink] = useState(params.get("liveLink") || "");
+  const [title, setTitle] = useState("");
+  const [image, setImage] = useState("");
+  const [tags, setTags] = useState("");
+  const [desc, setDesc] = useState("");
+  const [codeLink, setCodeLink] = useState("");
+  const [liveLink, setLiveLink] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const isEditing = params.get("title") !== null;
+  // 🔥 Load project when editing
+  useEffect(() => {
+    if (!id) return;
 
-  // Handle selecting image from gallery
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(`/api/projects/${id}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error("Fetch failed");
+
+        const data = await res.json();
+
+        setTitle(data.title || "");
+        setImage(data.image || "");
+        setTags(data.tags?.join(", ") || "");
+        setDesc(data.desc || "");
+        setCodeLink(data.codeLink || "");
+        setLiveLink(data.liveLink || "");
+      } catch (err) {
+        console.error("Edit load error:", err);
+      }
+    };
+
+    fetchProject();
+  }, [id]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = () => setImage(reader.result); // base64 image preview
+    reader.onload = () => setImage(reader.result);
     reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const projectData = {
       title,
       image,
       tags: tags.split(",").map((t) => t.trim()),
       desc,
-      featured,
       codeLink,
       liveLink,
     };
 
     try {
-      const res = await fetch("/api/projects", {
-        method: isEditing ? "PUT" : "POST", // use PUT if editing
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(projectData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage(isEditing ? "Project updated!" : "Project added!");
-        if (!isEditing) {
-          setTitle("");
-          setImage("");
-          setTags("");
-          setDesc("");
-          setFeatured(false);
-          setCodeLink("");
-          setLiveLink("");
+      const res = await fetch(
+        isEditing ? `/api/projects/${id}` : "/api/projects",
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(projectData),
         }
-        // Redirect to projects page if needed
-        // router.push("/admin-dashboard");
-      } else {
-        setMessage(data.error || "Something went wrong");
-      }
-    } catch (error) {
-      console.error(error);
+      );
+
+      setMessage(
+        res.ok
+          ? isEditing
+            ? "Project updated!"
+            : "Project added!"
+          : "Something went wrong"
+      );
+    } catch {
       setMessage("Failed to save project");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,7 +98,6 @@ export default function AddProject() {
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Title */}
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -90,25 +106,16 @@ export default function AddProject() {
           required
         />
 
-        {/* Image Picker */}
-        <div>
-          <label className="block mb-2 font-medium">Project Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
-          />
-          {image && (
-            <img
-              src={image}
-              alt="Preview"
-              className="mt-3 w-full h-60 object-cover rounded-md border"
-            />
-          )}
-        </div>
+        <input type="file" accept="image/*" onChange={handleImageChange} />
 
-        {/* Tags */}
+        {image && (
+          <img
+            src={image}
+            className="w-full h-48 object-cover rounded border"
+            alt="Preview"
+          />
+        )}
+
         <input
           value={tags}
           onChange={(e) => setTags(e.target.value)}
@@ -116,7 +123,6 @@ export default function AddProject() {
           className="w-full border px-3 py-2 rounded"
         />
 
-        {/* Description */}
         <textarea
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
@@ -124,7 +130,6 @@ export default function AddProject() {
           className="w-full border px-3 py-2 rounded"
         />
 
-        {/* Code & Live Links */}
         <input
           value={codeLink}
           onChange={(e) => setCodeLink(e.target.value)}
@@ -139,26 +144,11 @@ export default function AddProject() {
           className="w-full border px-3 py-2 rounded"
         />
 
-        {/* Featured Checkbox */}
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={featured}
-            onChange={(e) => setFeatured(e.target.checked)}
-            className="w-4 h-4"
-          />
-          Featured Project
-        </label>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="bg-purple-600 text-white px-4 py-2 rounded-lg w-full"
-        >
-          {isEditing ? "Update Project" : "Add Project"}
+        <button className="bg-purple-600 text-white px-4 py-2 rounded w-full">
+          {loading ? "Saving..." : isEditing ? "Update Project" : "Add Project"}
         </button>
 
-        {message && <p className="mt-2 text-center text-green-600">{message}</p>}
+        {message && <p className="text-green-600 text-center">{message}</p>}
       </form>
     </div>
   );
