@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AdminNavbar from "./components/adminNavbar";
+import AdminNavbar from "./components/AdminNavbar";
 import Projects from "./components/AdminProjects";
 import Skills from "./components/AdminSkills";
 import Contact from "./components/AdminContact";
