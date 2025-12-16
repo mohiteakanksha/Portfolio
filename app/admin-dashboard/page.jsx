@@ -1,5 +1,5 @@
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState } from "react";
 import AdminNavbar from "./components/AdminNavbar";
 import Projects from "./components/AdminProjects";
